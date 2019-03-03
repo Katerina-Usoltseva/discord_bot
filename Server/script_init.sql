@@ -1,4 +1,5 @@
 CREATE SCHEMA __python__;
+
 CREATE USER super_user PASSWORD 'qwerty';
 
 CREATE TABLE __python__.writer (writer_id SERIAL PRIMARY KEY, name VARCHAR(64) NOT NULL);
