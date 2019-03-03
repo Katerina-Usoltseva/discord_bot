@@ -1,5 +1,4 @@
 CREATE SCHEMA __python__;
-
 CREATE USER super_user PASSWORD 'qwerty';
 
 CREATE TABLE __python__.writer (writer_id SERIAL PRIMARY KEY, name VARCHAR(64) NOT NULL);
@@ -10,11 +9,11 @@ REFERENCES __python__.writer (writer_id) MATCH SIMPLE ON UPDATE CASCADE ON DELET
 
 INSERT INTO __python__.writer (name) 
 VALUES 
-('Чехов'),
-('Толстой'),
-('Достоевский');
+('Р§РµС…РѕРІ'),
+('РўРѕР»СЃС‚РѕР№'),
+('Р”РѕСЃС‚РѕРµРІСЃРєРёР№');
 
-INSERT INTO __python__.book (writer_id, name) SELECT unnest(array(SELECT writer_id FROM __python__.writer)), 'Интересная книга';
+INSERT INTO __python__.book (writer_id, name) SELECT unnest(array(SELECT writer_id FROM __python__.writer)), 'РРЅС‚РµСЂРµСЃРЅР°СЏ РєРЅРёРіР°';
 
 GRANT ALL ON SEQUENCE __python__.book_book_id_seq TO super_user;
 GRANT ALL ON SEQUENCE __python__.writer_writer_id_seq TO super_user;
