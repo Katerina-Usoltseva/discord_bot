@@ -1,11 +1,14 @@
 import psycopg2
 from Server.config import config
+from Server.Accessor import Accessor
+from Server.Controller import Controller
 
 
 class Server:
     def __init__(self):
         self.conn = None
         self.cur = None
+        self.controller = Controller()
 
     def connect_db(self):
         try:
@@ -15,6 +18,7 @@ class Server:
             # connect to the PostgreSQL server
             print('Connecting to the PostgreSQL database...')
             self.conn = psycopg2.connect(**params)
+            self.cur = self.conn.cursor()
 
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
@@ -28,7 +32,7 @@ class Server:
     def close_db(self):
         try:
             # close the communication with the PostgreSQL
-            self.cur.close()
+            self.conn.close()
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
         finally:
@@ -36,13 +40,49 @@ class Server:
                 self.conn.close()
                 print('Database connection closed.')
 
-    def do_query_db(self, query):
-        status = 'ok'
-        print(query)
-        self.cur = self.conn.cursor()
-        self.cur.execute(query[1:])
-        response = self.cur.fetchone()[2]
-        print(response)
-        self.conn.commit()
+    def execute_query(self, query, command):
+        if command == '$size':
+            return self.get_table_size_query()
+        elif command in ('$update', '$delete', '$insert'):
+            return self.alter_table_query(query[1:])
+        else:
+            # command is '$select':
+            return self.select_table_query(query[1:])
 
-        return status, response
+    def get_table_size_query(self):
+        response = ''
+        try:
+            self.cur.execute(Accessor.accessor_get_size_writer)
+            size = self.cur.fetchone()[0]
+            response += 'Writer: {0} records \n'.format(size)
+            self.cur.execute(Accessor.accessor_get_size_book)
+            size = self.cur.fetchone()[0]
+            response += 'Book: {0} records'.format(size)
+        except (Exception, psycopg2.DatabaseError) as error:
+            self.conn.rollback()  # rollback and continue the session
+            return error
+
+        self.conn.commit()
+        return response
+
+    def alter_table_query(self, query):
+        try:
+            self.cur.execute(query)
+        except (Exception, psycopg2.DatabaseError) as error:
+            self.conn.rollback()
+            return error
+
+        self.conn.commit()
+        return 'Operation succeeded'
+
+    def select_table_query(self, query):
+        try:
+            self.cur.execute(query)
+            records = [dict((self.cur.description[i][0], value)
+                            for i, value in enumerate(row)) for row in self.cur.fetchall()]
+        except (Exception, psycopg2.DatabaseError) as error:
+            self.conn.rollback()
+            return error
+
+        self.conn.commit()
+        return records
