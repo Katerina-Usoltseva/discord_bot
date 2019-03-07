@@ -26,4 +26,5 @@ Bot for Discord written in Python
 
 1. Caching with Redis
 2. Unit Tests
-3. More bot commands for execution
+3. Build in Docker
+4. More bot commands for execution
