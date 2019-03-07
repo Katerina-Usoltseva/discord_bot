@@ -8,7 +8,7 @@ Bot for Discord written in Python
 
 2. Clone the repo
 
-	`git clone https://github.com/Katerina-Usoltseva/discord_bot`
+	`https://github.com/Katerina-Usoltseva/discord_bot.git`
 
 3. Connect to postgresql from cmd
 
