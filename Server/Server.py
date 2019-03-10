@@ -50,7 +50,7 @@ class Server:
             return self.select_table_query(query[1:])
 
     def get_table_size_query(self):
-        response = ''
+        response, status = '', False
         try:
             self.cur.execute(Accessor.accessor_get_size_writer)
             size = self.cur.fetchone()[0]
@@ -60,29 +60,34 @@ class Server:
             response += 'Book: {0} records'.format(size)
         except (Exception, psycopg2.DatabaseError) as error:
             self.conn.rollback()  # rollback and continue the session
-            return error
+            return error, status
 
+        status = True
         self.conn.commit()
-        return response
+        return response, status
 
     def alter_table_query(self, query):
+        status = False
         try:
             self.cur.execute(query)
         except (Exception, psycopg2.DatabaseError) as error:
             self.conn.rollback()
-            return error
+            return error, status
 
+        status = True
         self.conn.commit()
-        return 'Operation succeeded'
+        return 'Operation succeeded', status
 
     def select_table_query(self, query):
+        status = False
         try:
             self.cur.execute(query)
             records = [dict((self.cur.description[i][0], value)
                             for i, value in enumerate(row)) for row in self.cur.fetchall()]
         except (Exception, psycopg2.DatabaseError) as error:
             self.conn.rollback()
-            return error
+            return error, status
 
+        status = True
         self.conn.commit()
-        return records
+        return records, status
