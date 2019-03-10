@@ -1,8 +1,8 @@
 from discord.ext import commands
 from Server.Server import Server
+import bot_settings as bot_settings
 
-bot = commands.Bot(command_prefix='$')
-token = 'NTUxMjQyNjU2OTkxMjgxMTYy.D1uIlA.ZM_UyJk2M7cgE9YkZL6eKI-NKdQ'
+bot = commands.Bot(bot_settings.command_prefix)
 
 
 @bot.event
@@ -25,4 +25,4 @@ async def on_message(message):
 if __name__ == '__main__':
     server = Server()
     if server.connect_db():
-        bot.run(token)
+        bot.run(bot_settings.token)
